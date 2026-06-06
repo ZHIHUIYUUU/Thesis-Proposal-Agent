@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
+    "build:pages": "vite build --outDir docs",
     "preview": "vite preview --host 127.0.0.1",
     "test": "node tests/engine.test.mjs && node tests/workflow.test.mjs && node tests/literatureApi.test.mjs && node tests/literatureSort.test.mjs"
   },

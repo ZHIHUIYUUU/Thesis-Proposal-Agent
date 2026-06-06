@@ -18,6 +18,14 @@ npm run build
 
 ## GitHub Pages 部署
 
-仓库推送到 `main` 分支后，`.github/workflows/deploy.yml` 会自动执行测试、构建并发布 `dist` 到 GitHub Pages。
+当前仓库使用手动 `docs/` 目录部署，避免依赖 GitHub Actions。
 
-首次使用时，在 GitHub 仓库的 `Settings -> Pages` 中把 Source 设置为 `GitHub Actions`。
+```bash
+npm run build:pages
+```
+
+把生成的 `docs/` 上传到 GitHub 后，在仓库 `Settings -> Pages` 中设置：
+
+- Source: `Deploy from a branch`
+- Branch: `main`
+- Folder: `/docs`

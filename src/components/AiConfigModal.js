@@ -31,10 +31,7 @@ export default function AiConfigModal({ open, onClose, onSaved }) {
       return;
     }
     const saved = saveAiConfig(form);
-    setForm(saved);
-    setMessage("已保存到本地浏览器。");
-    notifyConfigUpdated(saved);
-    onSaved?.(saved);
+    applySavedAiConfig(saved, { setForm, setMessage, onSaved, onClose });
   }
 
   function handleClear() {
@@ -133,6 +130,14 @@ export default function AiConfigModal({ open, onClose, onSaved }) {
       ),
     ),
   );
+}
+
+export function applySavedAiConfig(saved, callbacks = {}) {
+  callbacks.setForm?.(saved);
+  callbacks.setMessage?.("已保存到本地浏览器。");
+  notifyConfigUpdated(saved);
+  callbacks.onSaved?.(saved);
+  callbacks.onClose?.();
 }
 
 function notifyConfigUpdated(config) {

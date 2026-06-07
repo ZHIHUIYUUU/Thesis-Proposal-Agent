@@ -157,6 +157,32 @@ function jsonResponse(payload, ok = true, status = 200) {
 }
 
 {
+  const originalFetch = globalThis.fetch;
+  let thisValue;
+  globalThis.fetch = async function boundFetch(url, options) {
+    thisValue = this;
+    assert.equal(url, "https://api.example.com/v1/chat/completions");
+    assert.ok(options.body.includes("custom-test"));
+    return jsonResponse({ choices: [{ message: { content: JSON.stringify(validPayload) } }] });
+  };
+  try {
+    const result = await callLlm(
+      {
+        provider: "custom",
+        apiKey: "custom-key",
+        baseUrl: "https://api.example.com/v1",
+        model: "custom-test",
+      },
+      prompt,
+    );
+    assert.equal(thisValue, globalThis);
+    assert.equal(JSON.parse(result.text).candidates.length, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+{
   await assert.rejects(
     () =>
       callLlm(

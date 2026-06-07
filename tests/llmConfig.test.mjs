@@ -58,6 +58,16 @@ function memoryStorage() {
 }
 
 {
+  const normalized = normalizeProviderConfig({
+    provider: "xiaomi",
+    apiKey: "mi-key",
+  });
+  assert.equal(normalized.baseUrl, "https://api.xiaomimimo.com/v1");
+  assert.equal(normalized.model, "mimo-v2.5-pro");
+  assert.equal(normalized.apiStyle, "openai-compatible-chat");
+}
+
+{
   const invalid = validateAiConfig({ provider: "openai", apiKey: "", model: "" });
   assert.equal(invalid.valid, false);
   assert.match(invalid.errors.join(" "), /API Key/);

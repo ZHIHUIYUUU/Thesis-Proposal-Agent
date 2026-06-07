@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import AiConfigModal from "../src/components/AiConfigModal.js";
+import AiConfigModal, { applySavedAiConfig } from "../src/components/AiConfigModal.js";
 import AiStatusBadge from "../src/components/AiStatusBadge.js";
 
 {
@@ -37,6 +37,32 @@ import AiStatusBadge from "../src/components/AiStatusBadge.js";
 {
   const html = renderToStaticMarkup(React.createElement(AiConfigModal, { open: false, onClose: () => {}, onSaved: () => {} }));
   assert.equal(html, "");
+}
+
+{
+  const saved = { provider: "xiaomi", label: "小米 / MiLM", model: "mimo-v2.5-pro" };
+  let closed = false;
+  let savedArg = null;
+  let formArg = null;
+  let message = "";
+  applySavedAiConfig(saved, {
+    setForm: (value) => {
+      formArg = value;
+    },
+    setMessage: (value) => {
+      message = value;
+    },
+    onSaved: (value) => {
+      savedArg = value;
+    },
+    onClose: () => {
+      closed = true;
+    },
+  });
+  assert.equal(closed, true);
+  assert.deepEqual(savedArg, saved);
+  assert.deepEqual(formArg, saved);
+  assert.equal(message, "已保存到本地浏览器。");
 }
 
 console.log("ai component tests passed");

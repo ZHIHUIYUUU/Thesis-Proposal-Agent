@@ -34,9 +34,9 @@ export const providerPresets = [
     label: "小米 / MiLM",
     description: "按 OpenAI 兼容接口接入；请填写小米平台提供的 Base URL 和模型 ID。",
     apiStyle: "openai-compatible-chat",
-    defaultBaseUrl: "",
-    defaultModel: "",
-    modelHint: "填写小米平台的模型 ID",
+    defaultBaseUrl: "https://api.xiaomimimo.com/v1",
+    defaultModel: "mimo-v2.5-pro",
+    modelHint: "例如 mimo-v2.5-pro",
     baseUrlEditable: true,
   },
   {

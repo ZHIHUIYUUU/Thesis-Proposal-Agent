@@ -7,7 +7,7 @@ export async function callLlm(config, prompt, options = {}) {
   const validation = validateAiConfig(config);
   if (!validation.valid) throw new Error(validation.errors.join(" "));
   const normalized = validation.config;
-  const fetchImpl = options.fetchImpl || globalThis.fetch;
+  const fetchImpl = options.fetchImpl || ((url, init) => globalThis.fetch(url, init));
   if (!fetchImpl) throw new Error("当前环境不支持 fetch，无法请求 AI 服务。");
 
   const timeoutMs = options.timeoutMs || 45000;

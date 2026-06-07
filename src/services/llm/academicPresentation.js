@@ -55,6 +55,29 @@ export function proposalDraftSections(result = {}) {
   ];
 }
 
+export function usableTopicVersions(result = {}) {
+  return (result.versions || []).filter((item) =>
+    hasAllText(item, [
+      "title",
+      "researchObject",
+      "boundary",
+      "researchQuestion",
+      "methodRoute",
+      "dataRoute",
+      "feasibilityRisk",
+      "defenseFocus",
+    ]),
+  );
+}
+
+export function usableSearchQueries(result = {}) {
+  return (result.queries || []).filter((item) => hasAllText(item, ["label", "query", "intent"]));
+}
+
+export function usableGapCandidates(result = {}) {
+  return (result.candidates || []).filter((item) => hasAllText(item, ["title", "researchQuestion", "improvementPlan"]));
+}
+
 function selectedWorksFromState(state) {
   const selectedIds = new Set(state?.literature?.selectedIds || []);
   return (state?.literature?.works || []).filter((work) => selectedIds.has(work.id));
@@ -72,4 +95,8 @@ function joinList(value) {
 
 function text(value) {
   return String(value ?? "").replace(/\s+/g, " ").trim() || "未提供";
+}
+
+function hasAllText(item, fields) {
+  return fields.every((field) => String(item?.[field] ?? "").trim().length > 0);
 }

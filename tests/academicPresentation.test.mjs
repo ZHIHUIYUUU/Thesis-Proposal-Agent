@@ -3,6 +3,9 @@ import {
   buildAcademicContext,
   gapDraftFromAiCandidate,
   proposalDraftSections,
+  usableGapCandidates,
+  usableSearchQueries,
+  usableTopicVersions,
   validationFeedbackFromResult,
 } from "../src/services/llm/academicPresentation.js";
 
@@ -92,6 +95,30 @@ const state = {
   assert.deepEqual(validationFeedbackFromResult({ valid: true, validationErrors: ["ignored"] }), []);
   assert.deepEqual(validationFeedbackFromResult({ valid: false, validationErrors: ["缺少证据链"] }), ["缺少证据链"]);
   assert.deepEqual(validationFeedbackFromResult({ valid: false }), ["AI 返回内容不完整，需要补足后再采用。"]);
+}
+
+{
+  assert.equal(
+    usableTopicVersions({
+      versions: [
+        { level: "safe" },
+        {
+          level: "standard",
+          title: "具体题目",
+          researchObject: "对象",
+          boundary: "边界",
+          researchQuestion: "问题",
+          methodRoute: "方法",
+          dataRoute: "数据",
+          feasibilityRisk: "风险",
+          defenseFocus: "答辩",
+        },
+      ],
+    }).length,
+    1,
+  );
+  assert.equal(usableSearchQueries({ queries: [{ query: "" }, { label: "基准", query: "vehicle routing benchmark", intent: "找基准" }] }).length, 1);
+  assert.equal(usableGapCandidates({ candidates: [{ title: "" }, { title: "缺口", researchQuestion: "问题", improvementPlan: "改进" }] }).length, 1);
 }
 
 console.log("academic presentation tests passed");

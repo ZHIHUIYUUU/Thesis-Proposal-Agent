@@ -213,6 +213,16 @@ for (const task of ["topicNarrowing", "searchStrategy", "gapAnalysis", "proposal
 }
 
 {
+  const topicPrompt = buildAcademicPrompt("topicNarrowing", baseContext);
+  assert.match(topicPrompt.user, /JSON 输出模板/);
+  assert.match(topicPrompt.user, /researchObject/);
+  assert.match(topicPrompt.user, /defenseFocus/);
+  const searchPrompt = buildAcademicPrompt("searchStrategy", baseContext);
+  assert.match(searchPrompt.user, /mustHaveTerms/);
+  assert.match(searchPrompt.user, /falsePositiveRisk/);
+}
+
+{
   const normalized = normalizeAcademicPayload("topicNarrowing", topicPayload, { provider: "xiaomi", model: "mimo" });
   assert.equal(normalized.valid, true);
   assert.equal(normalized.versions.length, 3);
@@ -240,6 +250,39 @@ for (const task of ["topicNarrowing", "searchStrategy", "gapAnalysis", "proposal
   assert.equal(result.valid, true, `${task}: ${result.validationErrors?.join("；")}`);
   assert.equal(result.task, task);
   assert.equal(result.provider, "custom");
+}
+
+{
+  const calls = [];
+  const result = await runAcademicAgent({
+    task: "searchStrategy",
+    config: {
+      provider: "custom",
+      apiKey: "test-key",
+      baseUrl: "https://api.example.com/v1",
+      model: "custom-model",
+    },
+    context: baseContext,
+    fetchImpl: async (url, init) => {
+      calls.push(JSON.parse(init.body).messages[1].content);
+      return calls.length === 1
+        ? {
+            ok: true,
+            status: 200,
+            async text() {
+              return JSON.stringify({ choices: [{ message: { content: JSON.stringify({ summary: "too short", queries: [] }) } }] });
+            },
+            async json() {
+              return { choices: [{ message: { content: JSON.stringify({ summary: "too short", queries: [] }) } }] };
+            },
+          }
+        : responseFor("searchStrategy");
+    },
+  });
+  assert.equal(calls.length, 2);
+  assert.match(calls[1], /上次输出需要修正的问题/);
+  assert.equal(result.valid, true);
+  assert.equal(result.queries.length, 3);
 }
 
 console.log("academic agent tests passed");

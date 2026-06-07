@@ -4,7 +4,7 @@ import AiConfigModal from "../components/AiConfigModal.js";
 import { buildOpenAlexUrl, labelLiteratureSource } from "../engine.js";
 import { searchOpenAlex } from "../services/literatureApi.js";
 import { filterLiteratureWorks, sortLiteratureWorks } from "../services/literatureSort.js";
-import { buildAcademicContext, validationFeedbackFromResult } from "../services/llm/academicPresentation.js";
+import { buildAcademicContext, usableSearchQueries, validationFeedbackFromResult } from "../services/llm/academicPresentation.js";
 import { loadAiConfig } from "../services/llm/configStore.js";
 import { runAcademicAgent } from "../services/llm/academicAgent.js";
 import { useWorkflow } from "../state/WorkflowContext.jsx";
@@ -19,6 +19,7 @@ export default function LiteraturePage() {
   const [aiConfigOpen, setAiConfigOpen] = useState(false);
   const aiState = state.ai?.searchStrategy || { loading: false, error: "", result: null };
   const aiResult = aiState.result;
+  const searchQueries = usableSearchQueries(aiResult || {});
   const visibleWorks = useMemo(() => filterLiteratureWorks(literature.works, yearFilter), [literature.works, yearFilter]);
   const sortedWorks = useMemo(
     () => sortLiteratureWorks(visibleWorks, sortConfig, report.pool),
@@ -159,8 +160,9 @@ export default function LiteraturePage() {
           </div>
           <p className="table-hint">{aiResult.summary}</p>
           {aiResult.valid === false && <ValidationList items={aiResult.validationErrors} />}
+          {searchQueries.length > 0 ? (
           <div className="ai-card-grid">
-            {(aiResult.queries || []).map((item) => (
+            {searchQueries.map((item) => (
               <article key={item.id || item.query} className="ai-insight-card">
                 <span className="gap-tag">{item.label}</span>
                 <div className="query-box query-box-muted">{item.query}</div>
@@ -182,6 +184,9 @@ export default function LiteraturePage() {
               </article>
             ))}
           </div>
+          ) : (
+            <p className="empty-text">这次 AI 没有给出可用的英文检索式。系统会在下一次请求时自动要求模型补齐至少 3 组 query。</p>
+          )}
         </article>
       )}
 

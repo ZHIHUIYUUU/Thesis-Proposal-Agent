@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import AiConfigModal from "../components/AiConfigModal.js";
-import { buildAcademicContext, validationFeedbackFromResult } from "../services/llm/academicPresentation.js";
+import { buildAcademicContext, usableTopicVersions, validationFeedbackFromResult } from "../services/llm/academicPresentation.js";
 import { loadAiConfig } from "../services/llm/configStore.js";
 import { runAcademicAgent } from "../services/llm/academicAgent.js";
 import { useWorkflow } from "../state/WorkflowContext.jsx";
@@ -13,6 +13,7 @@ export default function TopicPage() {
   const topic = deepDive.topic;
   const aiState = state.ai?.topicNarrowing || { loading: false, error: "", result: null };
   const aiResult = aiState.result;
+  const topicVersions = usableTopicVersions(aiResult || {});
   const [aiConfig, setAiConfig] = useState(() => loadAiConfig());
   const [aiConfigOpen, setAiConfigOpen] = useState(false);
 
@@ -114,8 +115,9 @@ export default function TopicPage() {
           </div>
           <p className="table-hint">{aiResult.summary}</p>
           {aiResult.valid === false && <ValidationList items={aiResult.validationErrors} />}
+          {topicVersions.length > 0 ? (
           <div className="ai-card-grid">
-            {(aiResult.versions || []).map((version) => (
+            {topicVersions.map((version) => (
               <article key={version.id || version.title} className="ai-insight-card">
                 <span className="gap-tag">{levelLabel(version.level)}</span>
                 <h3>{version.title}</h3>
@@ -140,6 +142,9 @@ export default function TopicPage() {
               </article>
             ))}
           </div>
+          ) : (
+            <p className="empty-text">这次 AI 只返回了空壳版本，没有形成可展示的收窄方案。系统会在下一次请求时自动带着缺失项要求模型补全。</p>
+          )}
         </article>
       )}
       <AiConfigModal open={aiConfigOpen} onClose={() => setAiConfigOpen(false)} onSaved={setAiConfig} />

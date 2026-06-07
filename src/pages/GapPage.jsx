@@ -3,7 +3,7 @@ import { useState } from "react";
 import { buildGapMatrix, buildGapOptions, buildLiteratureInsights, labelLiteratureSource } from "../engine.js";
 import AiConfigModal from "../components/AiConfigModal.js";
 import { loadAiConfig } from "../services/llm/configStore.js";
-import { buildAcademicContext, gapDraftFromAiCandidate, validationFeedbackFromResult } from "../services/llm/academicPresentation.js";
+import { buildAcademicContext, gapDraftFromAiCandidate, usableGapCandidates, validationFeedbackFromResult } from "../services/llm/academicPresentation.js";
 import { runAcademicAgent } from "../services/llm/academicAgent.js";
 import { selectedWorks } from "../services/exportFiles.js";
 import { useWorkflow } from "../state/WorkflowContext.jsx";
@@ -17,6 +17,7 @@ export default function GapPage() {
   const selectedGap = gapOptions.find((option) => option.id === state.gapChoiceId);
   const aiState = state.ai?.gapAnalysis || state.aiGapAnalysis || { loading: false, error: "", result: null, validationFeedback: [] };
   const aiResult = aiState.result;
+  const aiCandidates = usableGapCandidates(aiResult || {});
   const [aiConfig, setAiConfig] = useState(() => loadAiConfig());
   const [aiConfigOpen, setAiConfigOpen] = useState(false);
 
@@ -152,8 +153,9 @@ export default function GapPage() {
           <p className="table-hint">{aiResult.summary}</p>
           {aiState.validationFeedback?.length > 0 && <ValidationList items={aiState.validationFeedback} />}
           {aiResult.rawText && !aiResult.valid && <pre className="raw-ai-output">{aiResult.rawText}</pre>}
+          {aiCandidates.length > 0 ? (
           <div className="gap-matrix">
-            {aiResult.candidates.map((candidate) => (
+            {aiCandidates.map((candidate) => (
               <article key={candidate.id} className={`gap-card ai-gap-card ${state.gapChoiceId === `ai:${candidate.id}` ? "selected" : ""}`}>
                 <div className="gap-title-row">
                   <span className="gap-tag">{candidate.gapType}</span>
@@ -206,6 +208,9 @@ export default function GapPage() {
               </article>
             ))}
           </div>
+          ) : (
+            <p className="empty-text">这次 AI 没有形成可采用的缺口方向。系统会在下一次请求时自动要求模型补齐证据链、改进方案和研究边界。</p>
+          )}
         </article>
       )}
 

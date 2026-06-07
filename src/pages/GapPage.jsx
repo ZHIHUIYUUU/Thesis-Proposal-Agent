@@ -3,8 +3,9 @@ import { useState } from "react";
 import { buildGapMatrix, buildGapOptions, buildLiteratureInsights, labelLiteratureSource } from "../engine.js";
 import AiConfigModal from "../components/AiConfigModal.js";
 import { loadAiConfig } from "../services/llm/configStore.js";
+import { buildAcademicContext, gapDraftFromAiCandidate, validationFeedbackFromResult } from "../services/llm/academicPresentation.js";
+import { runAcademicAgent } from "../services/llm/academicAgent.js";
 import { selectedWorks } from "../services/exportFiles.js";
-import { runGapAnalysis } from "../services/llm/gapAgent.js";
 import { useWorkflow } from "../state/WorkflowContext.jsx";
 
 export default function GapPage() {
@@ -14,7 +15,7 @@ export default function GapPage() {
   const matrix = buildGapMatrix(state.report, state.deepDive, works);
   const gapOptions = buildGapOptions(state.report, state.deepDive, works);
   const selectedGap = gapOptions.find((option) => option.id === state.gapChoiceId);
-  const aiState = state.aiGapAnalysis || { loading: false, error: "", result: null };
+  const aiState = state.ai?.gapAnalysis || state.aiGapAnalysis || { loading: false, error: "", result: null, validationFeedback: [] };
   const aiResult = aiState.result;
   const [aiConfig, setAiConfig] = useState(() => loadAiConfig());
   const [aiConfigOpen, setAiConfigOpen] = useState(false);
@@ -26,26 +27,25 @@ export default function GapPage() {
       setAiConfigOpen(true);
       return;
     }
-    dispatch({ type: "SET_AI_GAP_LOADING", payload: true });
+    dispatch({ type: "SET_AI_TASK_LOADING", task: "gapAnalysis", payload: true });
     try {
-      const result = await runGapAnalysis({
+      const result = await runAcademicAgent({
+        task: "gapAnalysis",
         config,
-        context: {
-          report: state.report,
-          topic: state.deepDive.topic,
+        context: buildAcademicContext(state, {
           works,
           matrix,
           ruleCandidates: gapOptions,
-        },
+        }),
       });
-      if (!result.valid) {
-        dispatch({ type: "SET_AI_GAP_RESULT", payload: result });
-        dispatch({ type: "SET_AI_GAP_ERROR", payload: result.validationErrors?.join("；") || "AI 返回结果不完整。" });
-        return;
-      }
-      dispatch({ type: "SET_AI_GAP_RESULT", payload: result });
+      dispatch({
+        type: "SET_AI_TASK_RESULT",
+        task: "gapAnalysis",
+        payload: result,
+        validationFeedback: validationFeedbackFromResult(result),
+      });
     } catch (error) {
-      dispatch({ type: "SET_AI_GAP_ERROR", payload: error.message || "AI 分析失败" });
+      dispatch({ type: "SET_AI_TASK_ERROR", task: "gapAnalysis", payload: error.message || "AI 分析失败" });
     }
   }
 
@@ -150,6 +150,7 @@ export default function GapPage() {
             </span>
           </div>
           <p className="table-hint">{aiResult.summary}</p>
+          {aiState.validationFeedback?.length > 0 && <ValidationList items={aiState.validationFeedback} />}
           {aiResult.rawText && !aiResult.valid && <pre className="raw-ai-output">{aiResult.rawText}</pre>}
           <div className="gap-matrix">
             {aiResult.candidates.map((candidate) => (
@@ -164,6 +165,12 @@ export default function GapPage() {
                   <dd>{candidate.researchQuestion}</dd>
                   <dt>文献理解</dt>
                   <dd>{candidate.articleUnderstanding}</dd>
+                  <dt>开题价值</dt>
+                  <dd>{candidate.openingValue}</dd>
+                  <dt>证据空白</dt>
+                  <dd>{candidate.evidenceGap}</dd>
+                  <dt>研究边界</dt>
+                  <dd>{candidate.scopeBoundary}</dd>
                   <dt>证据链</dt>
                   <dd>
                     <ol className="compact-list">
@@ -192,7 +199,7 @@ export default function GapPage() {
                 <button
                   className={state.gapChoiceId === `ai:${candidate.id}` ? "secondary-button" : "primary-button"}
                   type="button"
-                  onClick={() => dispatch({ type: "SELECT_AI_GAP_OPTION", payload: { id: candidate.id, draft: draftFromAiCandidate(candidate) } })}
+                  onClick={() => dispatch({ type: "SELECT_AI_GAP_OPTION", payload: { id: candidate.id, draft: gapDraftFromAiCandidate(candidate) } })}
                 >
                   {state.gapChoiceId === `ai:${candidate.id}` ? "已采用" : "采用这个 AI 方向"}
                 </button>
@@ -337,6 +344,16 @@ function confidenceLabel(value) {
   return { low: "低", medium: "中", high: "高" }[value] || "中";
 }
 
-function draftFromAiCandidate(candidate) {
-  return `AI 缺口方向：${candidate.title}。研究问题：${candidate.researchQuestion}。文献理解：${candidate.articleUnderstanding}。改进方案：${candidate.improvementPlan}。方法路线：${candidate.methodRoute}。数据路线：${candidate.dataRoute}。主要风险：${candidate.risks.join("；")}。下一步补文献：${candidate.nextSearchKeywords.join("；")}。`;
+function ValidationList({ items = [] }) {
+  if (!items.length) return null;
+  return (
+    <div className="validation-panel">
+      <strong>AI 输出需要补足</strong>
+      <ul>
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
 }

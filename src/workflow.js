@@ -30,6 +30,7 @@ export function createInitialWorkflowState() {
     selectedTopicRank: null,
     deepDive: null,
     literature: createLiteratureState(),
+    ai: createAiState(),
     aiGapAnalysis: createAiGapAnalysisState(),
     gapNote: "",
     gapChoiceId: "",
@@ -57,15 +58,23 @@ export function workflowReducer(state, action) {
     case "TOGGLE_LITERATURE_SELECTION":
       return toggleLiteratureSelection(state, action.payload);
     case "SET_AI_GAP_LOADING":
-      return { ...state, aiGapAnalysis: { ...state.aiGapAnalysis, loading: Boolean(action.payload), error: "" } };
+      return setAiTaskLoading(state, "gapAnalysis", action.payload);
     case "SET_AI_GAP_RESULT":
-      return { ...state, aiGapAnalysis: { loading: false, error: "", result: action.payload || null } };
+      return setAiTaskResult(state, "gapAnalysis", action.payload, action.validationFeedback);
     case "SET_AI_GAP_ERROR":
-      return { ...state, aiGapAnalysis: { ...state.aiGapAnalysis, loading: false, error: String(action.payload || "AI 分析失败") } };
+      return setAiTaskError(state, "gapAnalysis", action.payload || "AI 分析失败");
     case "CLEAR_AI_GAP_RESULT":
-      return { ...state, aiGapAnalysis: createAiGapAnalysisState() };
+      return clearAiTask(state, "gapAnalysis");
+    case "SET_AI_TASK_LOADING":
+      return setAiTaskLoading(state, action.task, action.payload);
+    case "SET_AI_TASK_RESULT":
+      return setAiTaskResult(state, action.task, action.payload, action.validationFeedback);
+    case "SET_AI_TASK_ERROR":
+      return setAiTaskError(state, action.task, action.payload);
+    case "CLEAR_AI_TASK":
+      return clearAiTask(state, action.task);
     case "UPDATE_GAP_NOTE":
-      return { ...state, aiGapAnalysis: createAiGapAnalysisState(), gapNote: String(action.payload || ""), gapChoiceId: "", proposal: null };
+      return { ...state, ...resetAiPatch(), gapNote: String(action.payload || ""), gapChoiceId: "", proposal: null };
     case "SELECT_GAP_OPTION":
       return selectGapOption(state, action.payload || {});
     case "SELECT_AI_GAP_OPTION":
@@ -95,7 +104,7 @@ function updateIntake(state, payload) {
       selectedTopicRank: null,
       deepDive: null,
       literature: createLiteratureState(),
-      aiGapAnalysis: createAiGapAnalysisState(),
+      ...resetAiPatch(),
       gapNote: "",
       gapChoiceId: "",
       proposal: null,
@@ -126,7 +135,7 @@ function toggleDirection(state, key) {
     selectedTopicRank: null,
     deepDive: null,
     literature: createLiteratureState(),
-    aiGapAnalysis: createAiGapAnalysisState(),
+    ...resetAiPatch(),
     gapNote: "",
     gapChoiceId: "",
     proposal: null,
@@ -144,7 +153,7 @@ function selectTopic(state, rank) {
     selectedTopicRank: selectedRank,
     deepDive,
     literature: createLiteratureState(),
-    aiGapAnalysis: createAiGapAnalysisState(),
+    ...resetAiPatch(),
     gapNote: "",
     gapChoiceId: "",
     proposal: null,
@@ -162,7 +171,7 @@ function setLiterature(state, payload = {}) {
       lastQuery: Array.isArray(payload) ? "" : payload.query || "",
       lastUrl: Array.isArray(payload) ? "" : payload.url || "",
     }),
-    aiGapAnalysis: createAiGapAnalysisState(),
+    ...resetAiPatch(),
     gapNote: "",
     gapChoiceId: "",
     proposal: null,
@@ -192,6 +201,106 @@ function createAiGapAnalysisState(overrides = {}) {
   };
 }
 
+function createAiTaskState(overrides = {}) {
+  return {
+    loading: false,
+    error: "",
+    result: null,
+    ...overrides,
+  };
+}
+
+function createAiGapTaskState(overrides = {}) {
+  return createAiTaskState({
+    validationFeedback: [],
+    ...overrides,
+  });
+}
+
+function createAiState(overrides = {}) {
+  return {
+    topicNarrowing: createAiTaskState(overrides.topicNarrowing),
+    searchStrategy: createAiTaskState(overrides.searchStrategy),
+    gapAnalysis: createAiGapTaskState(overrides.gapAnalysis),
+    proposalDraft: createAiTaskState(overrides.proposalDraft),
+  };
+}
+
+function resetAiPatch() {
+  return {
+    ai: createAiState(),
+    aiGapAnalysis: createAiGapAnalysisState(),
+  };
+}
+
+function readAiState(state) {
+  return createAiState(
+    state.ai || {
+      gapAnalysis: state.aiGapAnalysis || undefined,
+    },
+  );
+}
+
+function isKnownAiTask(task) {
+  return ["topicNarrowing", "searchStrategy", "gapAnalysis", "proposalDraft"].includes(task);
+}
+
+function patchAiTask(state, task, taskState) {
+  if (!isKnownAiTask(task)) {
+    return state;
+  }
+  const ai = {
+    ...readAiState(state),
+    [task]: task === "gapAnalysis" ? createAiGapTaskState(taskState) : createAiTaskState(taskState),
+  };
+  const next = { ...state, ai };
+  if (task !== "gapAnalysis") {
+    return next;
+  }
+  return {
+    ...next,
+    aiGapAnalysis: createAiGapAnalysisState({
+      loading: ai.gapAnalysis.loading,
+      error: ai.gapAnalysis.error,
+      result: ai.gapAnalysis.result,
+    }),
+  };
+}
+
+function setAiTaskLoading(state, task, loading) {
+  const current = readAiState(state)[task];
+  return patchAiTask(state, task, {
+    ...current,
+    loading: Boolean(loading),
+    error: "",
+  });
+}
+
+function setAiTaskResult(state, task, payload, validationFeedback) {
+  const nextTask = {
+    loading: false,
+    error: "",
+    result: payload || null,
+  };
+  if (task === "gapAnalysis") {
+    nextTask.validationFeedback = Array.isArray(validationFeedback) ? validationFeedback : [];
+  }
+  return patchAiTask(state, task, nextTask);
+}
+
+function setAiTaskError(state, task, payload) {
+  const current = readAiState(state)[task];
+  return patchAiTask(state, task, {
+    ...current,
+    loading: false,
+    error: String(payload || "AI task failed"),
+  });
+}
+
+function clearAiTask(state, task) {
+  return patchAiTask(state, task, task === "gapAnalysis" ? createAiGapTaskState() : createAiTaskState());
+}
+
 function toggleLiteratureSelection(state, id) {
   if (!id) {
     return state;
@@ -205,7 +314,7 @@ function toggleLiteratureSelection(state, id) {
         ? state.literature.selectedIds.filter((item) => item !== id)
         : [...state.literature.selectedIds, id],
     },
-    aiGapAnalysis: createAiGapAnalysisState(),
+    ...resetAiPatch(),
     gapNote: "",
     gapChoiceId: "",
     proposal: null,

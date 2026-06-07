@@ -860,6 +860,70 @@ td span {
   border-color: #cce4d6;
 }
 
+.ai-card-grid,
+.ai-proposal-sections {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.ai-card-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ai-insight-card,
+.ai-proposal-section {
+  border: 1px solid #d7e7ed;
+  border-radius: 8px;
+  background: #fff;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.ai-insight-card h3,
+.ai-proposal-section h4 {
+  margin: 0;
+}
+
+.ai-insight-card dl {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 7px 10px;
+}
+
+.ai-insight-card dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.ai-insight-card dd,
+.ai-proposal-section p,
+.ai-proposal-section li {
+  color: #344054;
+  line-height: 1.55;
+}
+
+.validation-panel {
+  border: 1px solid #f1d29b;
+  border-radius: 8px;
+  background: #fffaf0;
+  color: #6b4300;
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 10px 12px;
+}
+
+.validation-panel ul,
+.ai-proposal-section ul {
+  margin-left: 18px;
+}
+
+.validation-panel li {
+  line-height: 1.5;
+}
+
 .raw-ai-output {
   border: 1px solid #dbe3ec;
   border-radius: 8px;
@@ -1074,6 +1138,7 @@ td span {
   .export-grid,
   .gap-matrix,
   .proposal-layout,
+  .ai-card-grid,
   .option-grid,
   .provider-grid,
   .step-nav,
@@ -1082,6 +1147,7 @@ td span {
   }
 
   .topic-focus dl,
+  .ai-insight-card dl,
   .gap-card dl {
     grid-template-columns: 1fr;
   }

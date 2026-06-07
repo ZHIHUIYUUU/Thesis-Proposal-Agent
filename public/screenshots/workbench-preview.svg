@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="820" viewBox="0 0 1440 820" role="img" aria-labelledby="title desc">
+  <title id="title">研究选题工作台产品预览</title>
+  <desc id="desc">展示研究选题工作台从需求采集、文献检索、缺口矩阵到开题包的核心流程。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#eef6fb"/>
+      <stop offset="58%" stop-color="#f8fbfd"/>
+      <stop offset="100%" stop-color="#edf7f3"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#0a2540" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="1440" height="820" fill="url(#bg)"/>
+  <rect x="90" y="72" width="1260" height="676" rx="18" fill="#ffffff" filter="url(#shadow)"/>
+
+  <rect x="90" y="72" width="282" height="676" rx="18" fill="#f6f9fb"/>
+  <path d="M372 72v676" stroke="#d8e3ea"/>
+  <text x="126" y="132" fill="#06172f" font-family="Microsoft YaHei, Arial, sans-serif" font-size="34" font-weight="700">研究选题工作台</text>
+  <text x="126" y="170" fill="#49637d" font-family="Microsoft YaHei, Arial, sans-serif" font-size="20">从模糊兴趣到可答辩开题方案</text>
+
+  <rect x="126" y="216" width="210" height="88" rx="10" fill="#edf8f1" stroke="#9ed4b1"/>
+  <text x="148" y="252" fill="#07506b" font-family="Microsoft YaHei, Arial, sans-serif" font-size="19" font-weight="700">智能模式</text>
+  <text x="148" y="282" fill="#49637d" font-family="Microsoft YaHei, Arial, sans-serif" font-size="16">BYOK · OpenAI · Claude · DeepSeek · MiLM</text>
+
+  <g font-family="Microsoft YaHei, Arial, sans-serif" font-size="18" font-weight="700">
+    <rect x="126" y="342" width="210" height="50" rx="8" fill="#ffffff" stroke="#1b7891"/>
+    <text x="146" y="374" fill="#06172f">1  需求采集</text>
+    <rect x="126" y="406" width="210" height="50" rx="8" fill="#ffffff" stroke="#d3dee7"/>
+    <text x="146" y="438" fill="#06172f">2  学科路由</text>
+    <rect x="126" y="470" width="210" height="50" rx="8" fill="#ffffff" stroke="#d3dee7"/>
+    <text x="146" y="502" fill="#06172f">3  方向地图</text>
+    <rect x="126" y="534" width="210" height="50" rx="8" fill="#ffffff" stroke="#d3dee7"/>
+    <text x="146" y="566" fill="#06172f">4  文献检索</text>
+    <rect x="126" y="598" width="210" height="50" rx="8" fill="#e8f5f8" stroke="#1b7891"/>
+    <text x="146" y="630" fill="#06172f">5  缺口矩阵</text>
+  </g>
+
+  <g font-family="Microsoft YaHei, Arial, sans-serif">
+    <text x="430" y="138" fill="#07506b" font-size="18" font-weight="700">STEP 7</text>
+    <text x="430" y="180" fill="#06172f" font-size="38" font-weight="700">缺口矩阵：把文献读成可改进方向</text>
+    <text x="430" y="216" fill="#49637d" font-size="19">不是简单列论文，而是围绕具体场景、变量、约束、数据、基线和风险判断选题能不能继续做。</text>
+  </g>
+
+  <g font-family="Microsoft YaHei, Arial, sans-serif">
+    <rect x="430" y="262" width="276" height="74" rx="10" fill="#f7fbfd" stroke="#d7e4ec"/>
+    <text x="452" y="292" fill="#49637d" font-size="16">问题边界</text>
+    <text x="452" y="320" fill="#06172f" font-size="22" font-weight="700">研究对象是否具体</text>
+
+    <rect x="724" y="262" width="276" height="74" rx="10" fill="#f7fbfd" stroke="#d7e4ec"/>
+    <text x="746" y="292" fill="#49637d" font-size="16">证据链</text>
+    <text x="746" y="320" fill="#06172f" font-size="22" font-weight="700">文献能否支撑缺口</text>
+
+    <rect x="1018" y="262" width="276" height="74" rx="10" fill="#f7fbfd" stroke="#d7e4ec"/>
+    <text x="1040" y="292" fill="#49637d" font-size="16">可行性</text>
+    <text x="1040" y="320" fill="#06172f" font-size="22" font-weight="700">数据与方法是否落地</text>
+  </g>
+
+  <rect x="430" y="382" width="864" height="158" rx="14" fill="#f4fbf8" stroke="#a7d6bf"/>
+  <text x="460" y="422" fill="#07506b" font-family="Microsoft YaHei, Arial, sans-serif" font-size="17" font-weight="700">INTELLIGENT MODE</text>
+  <text x="460" y="458" fill="#06172f" font-family="Microsoft YaHei, Arial, sans-serif" font-size="28" font-weight="700">AI 深度分析</text>
+  <text x="460" y="496" fill="#233b58" font-family="Microsoft YaHei, Arial, sans-serif" font-size="19">基于已选文献与场景矩阵，生成具体研究问题、证据链、可改进点、风险和补文献关键词。</text>
+
+  <g font-family="Microsoft YaHei, Arial, sans-serif">
+    <rect x="430" y="574" width="260" height="102" rx="12" fill="#ffffff" stroke="#d7e4ec"/>
+    <text x="452" y="610" fill="#07506b" font-size="17" font-weight="700">候选方向</text>
+    <text x="452" y="644" fill="#06172f" font-size="21" font-weight="700">电动车队路径约束建模</text>
+
+    <rect x="716" y="574" width="260" height="102" rx="12" fill="#ffffff" stroke="#d7e4ec"/>
+    <text x="738" y="610" fill="#07506b" font-size="17" font-weight="700">文献检索</text>
+    <text x="738" y="644" fill="#06172f" font-size="21" font-weight="700">2000 年以来可排序筛选</text>
+
+    <rect x="1002" y="574" width="292" height="102" rx="12" fill="#ffffff" stroke="#d7e4ec"/>
+    <text x="1024" y="610" fill="#07506b" font-size="17" font-weight="700">开题包</text>
+    <text x="1024" y="644" fill="#06172f" font-size="21" font-weight="700">问题、方法、数据和答辩风险</text>
+  </g>
+</svg>

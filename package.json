@@ -8,7 +8,7 @@
     "build": "vite build",
     "build:pages": "vite build --outDir docs",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "node tests/engine.test.mjs && node tests/workflow.test.mjs && node tests/literatureApi.test.mjs && node tests/literatureSort.test.mjs && node tests/llmConfig.test.mjs && node tests/llmPromptSchema.test.mjs && node tests/llmAdapters.test.mjs"
+    "test": "node tests/engine.test.mjs && node tests/workflow.test.mjs && node tests/literatureApi.test.mjs && node tests/literatureSort.test.mjs && node tests/llmConfig.test.mjs && node tests/llmPromptSchema.test.mjs && node tests/llmAdapters.test.mjs && node tests/aiWorkflow.test.mjs"
   },
   "dependencies": {
     "react": "^19.0.0",

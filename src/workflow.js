@@ -30,6 +30,7 @@ export function createInitialWorkflowState() {
     selectedTopicRank: null,
     deepDive: null,
     literature: createLiteratureState(),
+    aiGapAnalysis: createAiGapAnalysisState(),
     gapNote: "",
     gapChoiceId: "",
     proposal: null,
@@ -55,10 +56,20 @@ export function workflowReducer(state, action) {
       return setLiterature(state, action.payload);
     case "TOGGLE_LITERATURE_SELECTION":
       return toggleLiteratureSelection(state, action.payload);
+    case "SET_AI_GAP_LOADING":
+      return { ...state, aiGapAnalysis: { ...state.aiGapAnalysis, loading: Boolean(action.payload), error: "" } };
+    case "SET_AI_GAP_RESULT":
+      return { ...state, aiGapAnalysis: { loading: false, error: "", result: action.payload || null } };
+    case "SET_AI_GAP_ERROR":
+      return { ...state, aiGapAnalysis: { ...state.aiGapAnalysis, loading: false, error: String(action.payload || "AI 分析失败") } };
+    case "CLEAR_AI_GAP_RESULT":
+      return { ...state, aiGapAnalysis: createAiGapAnalysisState() };
     case "UPDATE_GAP_NOTE":
-      return { ...state, gapNote: String(action.payload || ""), gapChoiceId: "", proposal: null };
+      return { ...state, aiGapAnalysis: createAiGapAnalysisState(), gapNote: String(action.payload || ""), gapChoiceId: "", proposal: null };
     case "SELECT_GAP_OPTION":
       return selectGapOption(state, action.payload || {});
+    case "SELECT_AI_GAP_OPTION":
+      return selectAiGapOption(state, action.payload || {});
     case "BUILD_PROPOSAL":
       return buildProposal(state);
     case "RESET_WORKFLOW":
@@ -84,6 +95,7 @@ function updateIntake(state, payload) {
       selectedTopicRank: null,
       deepDive: null,
       literature: createLiteratureState(),
+      aiGapAnalysis: createAiGapAnalysisState(),
       gapNote: "",
       gapChoiceId: "",
       proposal: null,
@@ -114,6 +126,7 @@ function toggleDirection(state, key) {
     selectedTopicRank: null,
     deepDive: null,
     literature: createLiteratureState(),
+    aiGapAnalysis: createAiGapAnalysisState(),
     gapNote: "",
     gapChoiceId: "",
     proposal: null,
@@ -131,6 +144,7 @@ function selectTopic(state, rank) {
     selectedTopicRank: selectedRank,
     deepDive,
     literature: createLiteratureState(),
+    aiGapAnalysis: createAiGapAnalysisState(),
     gapNote: "",
     gapChoiceId: "",
     proposal: null,
@@ -148,6 +162,7 @@ function setLiterature(state, payload = {}) {
       lastQuery: Array.isArray(payload) ? "" : payload.query || "",
       lastUrl: Array.isArray(payload) ? "" : payload.url || "",
     }),
+    aiGapAnalysis: createAiGapAnalysisState(),
     gapNote: "",
     gapChoiceId: "",
     proposal: null,
@@ -168,6 +183,15 @@ function createLiteratureState(overrides = {}) {
   };
 }
 
+function createAiGapAnalysisState(overrides = {}) {
+  return {
+    loading: false,
+    error: "",
+    result: null,
+    ...overrides,
+  };
+}
+
 function toggleLiteratureSelection(state, id) {
   if (!id) {
     return state;
@@ -181,6 +205,9 @@ function toggleLiteratureSelection(state, id) {
         ? state.literature.selectedIds.filter((item) => item !== id)
         : [...state.literature.selectedIds, id],
     },
+    aiGapAnalysis: createAiGapAnalysisState(),
+    gapNote: "",
+    gapChoiceId: "",
     proposal: null,
   };
 }
@@ -204,6 +231,19 @@ function selectGapOption(state, payload) {
   return {
     ...state,
     gapChoiceId: String(payload.id || ""),
+    gapNote: draft,
+    proposal: null,
+  };
+}
+
+function selectAiGapOption(state, payload) {
+  const draft = String(payload.draft || "").trim();
+  if (!draft) {
+    return state;
+  }
+  return {
+    ...state,
+    gapChoiceId: `ai:${String(payload.id || "selected")}`,
     gapNote: draft,
     proposal: null,
   };
